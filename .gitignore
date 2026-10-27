@@ -1,13 +1,28 @@
-# Ignore Python cache
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# Ignore all backup files
+# Backup files
+*.bak
+*.bak*
 *.bak_*
+*.backup
 *.backup*
+*.backup_*
+*.broken*
+*.broken_*
+*.MASTER_BACKUP*
+*.pre_patch_*
 brain.py.pre_patch_*
+brain.py.backup_*
+brain.py.bak_*
 d5pi.py.backup_*
+tts_speaker.py.bak_*
+*~
+*.swp
+*.swo
 
-# Ignore system files
+# System files
 .DS_Store
 Thumbs.db

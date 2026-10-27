@@ -12,7 +12,7 @@ GRASSGUARD AI — PI-BRAIN (d5pi 1.3 — ZIGZAG-GPS-MOW + NARZO-AUTO-FIND + BACK
      5. YOLO 80-cheezein detect (person/dog/bottle/chair...) + 4 US radars
   ✅ v1.2 se: TAGDA-UI (radar/gauge/saw/E-STOP), login, ramp+arc-motors (v4)
 """
-import collections
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import math
@@ -85,7 +85,7 @@ S = {'F': '-', 'L': '-', 'R': '-', 'B': '-', 'RAIN': '-', 'MPU': '-', 'ACS': '-'
      'mode': 'stop', 'state': 'READY', 'blade': 'CUT', 'spd': '-',
      'det_name': '-', 'det_conf': 0, 'det_zone': '-', 'det_total': 0, 'vfps': 0,
      'cam_src': 'khul raha...', 'rep': '(ready)'}
-LOG = collections.deque(maxlen=14)
+LOG = deque(maxlen=14)
 VJPG = None
 ser_lock = threading.Lock()
 esp_lock = threading.Lock()
@@ -98,7 +98,7 @@ esp_path = None
 
 # ---------------- MOW STATE (zigzag) ----------------
 MOWW = {'corners': {}, 'wps': [], 'wi': 0, 'spacing': 1.0,
-        'grid_n': 5, 'grid_i': 0, 'grid_ok': 0, 'grid_bad': 0}
+        'grid_n': 5, 'grid_ok': 0, 'grid_bad': 0}
 GPS_HIST = []
 
 # ---------------- TELEMETRY & GPS STATE ----------------
@@ -237,22 +237,22 @@ def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(('10.255.255.255', 1))
-        ip = s.getsockname()[0]
+        local_ip = s.getsockname()[0]
     except Exception:
         try:
-            ip = socket.gethostbyname(socket.gethostname())
+            local_ip = socket.gethostbyname(socket.gethostname())
         except Exception:
-            ip = None
+            local_ip = None
     finally:
         s.close()
-    return ip
+    return local_ip
 
 def find_narzo():
     # WiFi badalne par Narzo ka IP badal jata hai — subnet scan se dhoondo
-    ip = get_local_ip()
-    if not ip or ip.startswith('127.'):
+    target_ip = get_local_ip()
+    if not target_ip or target_ip.startswith('127.'):
         return None
-    base = '.'.join(ip.split('.')[:3]) + '.'
+    base = '.'.join(target_ip.split('.')[:3]) + '.'
     found = []
     def probe(i):
         if found:
@@ -602,7 +602,6 @@ def ard_send(c, wait=0.2):
     global LAST_CMD, ard
     c = _swap(c)
     if c in '123456789V': c = '5'  # FORCE MAX SPEED EVERYWHERE
-    # Speed Lock Removed (Allow Speed 3)
     LAST_CMD = time.time()
     with ser_lock:
         if ard is None:
@@ -635,7 +634,6 @@ def brain_send(c, wait=0.15, force=False):
     global LAST_CMD, ard
     c = _swap(c)
     if c in '123456789V': c = '5'  # FORCE MAX SPEED EVERYWHERE
-    # Speed Lock Removed (Allow Speed 3)
     # GUARD: BACK command sirf tab jab B >= 25cm
     if c == 'B' and not force and back_blocked():
         b_val = float(T['b']) if is_valid_distance(T['b']) else 999.0
@@ -861,7 +859,7 @@ def _brain_inner():
         else:
             clear_t = 0.0
 
-        # Person memory check — 5s tak blade OFF
+        # Person memory check — 0.1s blade OFF
         if now - person_close_at < 0.1:
             sab_saaf = False
 
