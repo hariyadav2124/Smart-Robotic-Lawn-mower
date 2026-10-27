@@ -1,0 +1,20 @@
+GrassGuard - 14 Oct 2026
+========================
+
+DONE:
+- Camera wide 1280x720
+- YOLO test (81%)
+- TTS module (tts_speaker.py)
+- LIVING_WAIT_SEC = 5.0
+- CAM-US UI 5th row
+- L/R counter-turn
+- TURN_SWAP = False
+- MOW speed 20% (test)
+- IR pins: LEFT=GPIO34, RIGHT=GPIO32
+
+PENDING:
+- IR firmware (ESP32)
+- NEO-6M GPS integrate
+- TTS integration
+- Speaker purchase
+- MOW speed 80% (final)
